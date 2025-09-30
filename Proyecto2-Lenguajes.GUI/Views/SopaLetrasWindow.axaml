@@ -1,0 +1,78 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Proyecto2_Lenguajes.GUI.ViewModels"
+        x:Class="Proyecto2_Lenguajes.GUI.Views.SopaLetrasWindow"
+        x:DataType="vm:SopaLetrasViewModel"
+        Title="Sopa de Letras"
+        Width="800" Height="600">
+
+    <Design.DataContext>
+        <vm:SopaLetrasViewModel/>
+    </Design.DataContext>
+
+    <StackPanel Margin="10">
+        <!-- Mensaje de estado -->
+        <TextBlock Text="{Binding MensajeEstado}"
+                   Foreground="{Binding ColorMensaje}"
+                   FontSize="16"
+                   FontWeight="Bold"
+                   Margin="0,0,0,10"
+                   TextAlignment="Center"/>
+
+        <!-- Matriz de letras -->
+        <ItemsControl ItemsSource="{Binding Matriz}">  <!-- CAMBIO: Items -> ItemsSource -->
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <ItemsControl ItemsSource="{Binding}">  <!-- CAMBIO: Items -> ItemsSource -->
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Width="30" Height="30"
+                                        Background="{Binding Color}"
+                                        BorderBrush="Gray"
+                                        BorderThickness="1">
+                                    <TextBlock Text="{Binding Letra}"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               FontSize="14"
+                                               FontWeight="Bold"/>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Listas de palabras -->
+        <Grid Margin="0,20,0,0" ColumnDefinitions="*,*">
+            <StackPanel Grid.Column="0" Margin="5">
+                <TextBlock Text="Por encontrar:" FontWeight="Bold" Margin="0,0,0,5"/>
+                <ItemsControl ItemsSource="{Binding PalabrasPorEncontrar}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" Margin="5"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Margin="5">
+                <TextBlock Text="Encontradas:" FontWeight="Bold" Margin="0,0,0,5"/>
+                <ItemsControl ItemsSource="{Binding PalabrasEncontradas}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}"
+                                       Foreground="Green"
+                                       Margin="5"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Grid>
+    </StackPanel>
+</Window>
