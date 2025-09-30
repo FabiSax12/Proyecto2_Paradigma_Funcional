@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Proyecto2-Lenguajes.Logic", "Proyecto2-Lenguajes.Logic\Proyecto2-Lenguajes.Logic.fsproj", "{68B9F494-0D78-4F06-BD97-3D23832481F8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proyecto2-Lenguajes.GUI", "Proyecto2-Lenguajes.GUI\Proyecto2-Lenguajes.GUI.csproj", "{668D21E6-3F2A-4E8D-A4CF-36895FA29279}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{68B9F494-0D78-4F06-BD97-3D23832481F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68B9F494-0D78-4F06-BD97-3D23832481F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68B9F494-0D78-4F06-BD97-3D23832481F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68B9F494-0D78-4F06-BD97-3D23832481F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E19CFDA0-ACBF-4278-B157-2AF9CB5509A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E19CFDA0-ACBF-4278-B157-2AF9CB5509A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E19CFDA0-ACBF-4278-B157-2AF9CB5509A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E19CFDA0-ACBF-4278-B157-2AF9CB5509A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{668D21E6-3F2A-4E8D-A4CF-36895FA29279}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{668D21E6-3F2A-4E8D-A4CF-36895FA29279}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{668D21E6-3F2A-4E8D-A4CF-36895FA29279}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{668D21E6-3F2A-4E8D-A4CF-36895FA29279}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

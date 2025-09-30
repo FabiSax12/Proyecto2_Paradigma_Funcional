@@ -1,0 +1,76 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Proyecto2_Lenguajes.GUI.ViewModels"
+        x:Class="Proyecto2_Lenguajes.GUI.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Proyecto F# - Calculadora Simple"
+        Width="600" Height="500"
+        WindowStartupLocation="CenterScreen">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <StackPanel Margin="30" Spacing="20">
+
+        <!-- Título -->
+        <TextBlock Text="🧮 Calculadora F#"
+                  FontSize="24"
+                  FontWeight="Bold"
+                  HorizontalAlignment="Center"
+                  Margin="0,0,0,20"/>
+
+        <!-- Primer número -->
+        <StackPanel>
+            <TextBlock Text="Primer número:" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding FirstNumber}"
+                    Watermark="Ingresa el primer número"
+                    FontSize="16"
+                    Padding="10"/>
+        </StackPanel>
+
+        <!-- Segundo número -->
+        <StackPanel>
+            <TextBlock Text="Segundo número:" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding SecondNumber}"
+                    Watermark="Ingresa el segundo número"
+                    FontSize="16"
+                    Padding="10"/>
+        </StackPanel>
+
+        <!-- Operación -->
+        <StackPanel>
+            <TextBlock Text="Operación:" Margin="0,0,0,5"/>
+            <ComboBox SelectedIndex="{Binding SelectedOperation}"
+                     FontSize="16"
+                     Padding="10">
+                <ComboBoxItem Content="➕ Suma (+)"/>
+                <ComboBoxItem Content="➖ Resta (-)"/>
+                <ComboBoxItem Content="✖️ Multiplicación (×)"/>
+                <ComboBoxItem Content="➗ División (÷)"/>
+            </ComboBox>
+        </StackPanel>
+
+        <!-- Botón calcular -->
+        <Button Content="🔢 CALCULAR"
+                Command="{Binding CalculateCommand}"
+                FontSize="18"
+                FontWeight="Bold"
+                Padding="15"
+                HorizontalAlignment="Center"
+                Background="LightBlue"/>
+
+        <!-- Resultado -->
+        <Border Background="LightGray"
+                CornerRadius="5"
+                Padding="15"
+                Margin="0,10,0,0">
+            <TextBlock Text="{Binding Result}"
+                      FontSize="18"
+                      FontWeight="Bold"
+                      HorizontalAlignment="Center"
+                      TextWrapping="Wrap"/>
+        </Border>
+
+    </StackPanel>
+</Window>

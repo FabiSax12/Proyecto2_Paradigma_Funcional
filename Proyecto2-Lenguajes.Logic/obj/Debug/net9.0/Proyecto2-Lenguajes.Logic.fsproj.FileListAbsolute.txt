@@ -1,0 +1,13 @@
+/home/fvargas/Documents/dev/Tec/Proyecto2-Lenguajes/Proyecto2-Lenguajes.Logic/bin/Debug/net9.0/Proyecto2-Lenguajes.Logic.deps.json
+/home/fvargas/Documents/dev/Tec/Proyecto2-Lenguajes/Proyecto2-Lenguajes.Logic/bin/Debug/net9.0/Proyecto2-Lenguajes.Logic.dll
+/home/fvargas/Documents/dev/Tec/Proyecto2-Lenguajes/Proyecto2-Lenguajes.Logic/bin/Debug/net9.0/Proyecto2-Lenguajes.Logic.pdb
+/home/fvargas/Documents/dev/Tec/Proyecto2-Lenguajes/Proyecto2-Lenguajes.Logic/bin/Debug/net9.0/Proyecto2-Lenguajes.Logic.xml
+/home/fvargas/Documents/dev/Tec/Proyecto2-Lenguajes/Proyecto2-Lenguajes.Logic/obj/Debug/net9.0/Proyecto2-Lenguajes.Logic.fsproj.AssemblyReference.cache
+/home/fvargas/Documents/dev/Tec/Proyecto2-Lenguajes/Proyecto2-Lenguajes.Logic/obj/Debug/net9.0/Proyecto2-Lenguajes.Logic.AssemblyInfoInputs.cache
+/home/fvargas/Documents/dev/Tec/Proyecto2-Lenguajes/Proyecto2-Lenguajes.Logic/obj/Debug/net9.0/Proyecto2-Lenguajes.Logic.AssemblyInfo.fs
+/home/fvargas/Documents/dev/Tec/Proyecto2-Lenguajes/Proyecto2-Lenguajes.Logic/obj/Debug/net9.0/Proyecto2-Lenguajes.Logic.fsproj.CoreCompileInputs.cache
+/home/fvargas/Documents/dev/Tec/Proyecto2-Lenguajes/Proyecto2-Lenguajes.Logic/obj/Debug/net9.0/Proyecto2-Lenguajes.Logic.dll
+/home/fvargas/Documents/dev/Tec/Proyecto2-Lenguajes/Proyecto2-Lenguajes.Logic/obj/Debug/net9.0/refint/Proyecto2-Lenguajes.Logic.dll
+/home/fvargas/Documents/dev/Tec/Proyecto2-Lenguajes/Proyecto2-Lenguajes.Logic/obj/Debug/net9.0/Proyecto2-Lenguajes.Logic.xml
+/home/fvargas/Documents/dev/Tec/Proyecto2-Lenguajes/Proyecto2-Lenguajes.Logic/obj/Debug/net9.0/Proyecto2-Lenguajes.Logic.pdb
+/home/fvargas/Documents/dev/Tec/Proyecto2-Lenguajes/Proyecto2-Lenguajes.Logic/obj/Debug/net9.0/ref/Proyecto2-Lenguajes.Logic.dll

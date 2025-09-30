@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>Proyecto2_Lenguajes.Logic</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Calculator.fs" />
+  </ItemGroup>
+
+</Project>
