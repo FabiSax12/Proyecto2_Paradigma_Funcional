@@ -4,10 +4,11 @@
     <TargetFramework>net9.0</TargetFramework>
     <RootNamespace>Proyecto2_Lenguajes.Logic</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Calculator.fs" />
+    <Compile Include="SopaLetras.fs" />
   </ItemGroup>
 
 </Project>
