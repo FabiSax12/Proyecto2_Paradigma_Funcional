@@ -1,15 +1,13 @@
 using System;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using Avalonia.Media;
-using Proyecto2_Lenguajes.GUI.ViewModels;
 using Proyecto2_Lenguajes.Logic;
 using ReactiveUI;
 
 namespace Proyecto2_Lenguajes.GUI.ViewModels
 {
-  public class SopaLetrasViewModel : ViewModelBase
+    public class SopaLetrasViewModel : ViewModelBase
     {
         private SopaLetras.Estado? _estadoActual;
         private ObservableCollection<ObservableCollection<CeldaViewModel>> _matriz;
@@ -17,6 +15,10 @@ namespace Proyecto2_Lenguajes.GUI.ViewModels
         private ObservableCollection<string> _palabrasEncontradas;
         private string _mensajeEstado = string.Empty;
         private IBrush _colorMensaje;
+
+        // Para la selección del usuario
+        private CeldaViewModel? _celdaInicio;
+        private bool _seleccionando;
 
         public ObservableCollection<ObservableCollection<CeldaViewModel>> Matriz
         {
@@ -48,42 +50,62 @@ namespace Proyecto2_Lenguajes.GUI.ViewModels
             set => this.RaiseAndSetIfChanged(ref _colorMensaje, value);
         }
 
+        // Comandos
+        public ReactiveCommand<System.Reactive.Unit, System.Reactive.Unit> CargarJuegoFacilCommand { get; }
+        public ReactiveCommand<System.Reactive.Unit, System.Reactive.Unit> CargarJuegoMedioCommand { get; }
+        public ReactiveCommand<System.Reactive.Unit, System.Reactive.Unit> CargarJuegoDificilCommand { get; }
+        public ReactiveCommand<System.Reactive.Unit, System.Reactive.Unit> CargarPorTemaCommand { get; }
+        public ReactiveCommand<System.Reactive.Unit, System.Reactive.Unit> ResolverAutomaticoCommand { get; }
+        public ReactiveCommand<System.Reactive.Unit, System.Reactive.Unit> ReiniciarCommand { get; }
+
         public SopaLetrasViewModel()
         {
             _matriz = new ObservableCollection<ObservableCollection<CeldaViewModel>>();
             _palabrasPorEncontrar = new ObservableCollection<string>();
             _palabrasEncontradas = new ObservableCollection<string>();
             _colorMensaje = Brushes.Black;
+
+            // Inicializar comandos con diferentes dificultades
+            CargarJuegoFacilCommand = ReactiveCommand.Create(() => CargarJuegoPorDificultad("FACIL"));
+            CargarJuegoMedioCommand = ReactiveCommand.Create(() => CargarJuegoPorDificultad("MEDIO"));
+            CargarJuegoDificilCommand = ReactiveCommand.Create(() => CargarJuegoPorDificultad("DIFICIL"));
+            CargarPorTemaCommand = ReactiveCommand.Create(() => CargarJuegoPorTema("ANIMALES"));
+            ResolverAutomaticoCommand = ReactiveCommand.Create(ResolverAutomatico);
+            ReiniciarCommand = ReactiveCommand.Create(Reiniciar);
+
+            // Mensaje inicial
+            MensajeEstado = "🎮 Selecciona un nivel de dificultad para comenzar";
+            ColorMensaje = Brushes.Gray;
         }
 
         // ===== ACTUALIZAR MATRIZ =====
-        /// <summary>
-        /// Actualiza la UI con el estado de la sopa de letras
-        /// </summary>
         public void ActualizarMatriz(SopaLetras.Estado estado)
         {
             _estadoActual = estado;
-
-            // Limpiar matriz actual
             Matriz.Clear();
 
             int filas = estado.Matriz.GetLength(0);
             int columnas = estado.Matriz.GetLength(1);
 
-            // Crear celdas para la UI
             for (int i = 0; i < filas; i++)
             {
                 var fila = new ObservableCollection<CeldaViewModel>();
                 for (int j = 0; j < columnas; j++)
                 {
-                    fila.Add(new CeldaViewModel
+                    var celda = new CeldaViewModel
                     {
                         Letra = estado.Matriz[i, j],
                         Fila = i,
                         Columna = j,
                         Color = Brushes.White,
                         EstaSeleccionada = false
-                    });
+                    };
+
+                    // Suscribirse a eventos de clic
+                    celda.OnCeldaPresionada += CeldaPresionada;
+                    celda.OnCeldaSoltada += CeldaSoltada;
+
+                    fila.Add(celda);
                 }
                 Matriz.Add(fila);
             }
@@ -99,27 +121,63 @@ namespace Proyecto2_Lenguajes.GUI.ViewModels
             foreach (var palabra in estado.PalabrasEncontradas)
             {
                 PalabrasEncontradas.Add(palabra.Palabra);
-
-                // Marcar las palabras encontradas automáticamente
                 MarcarPalabraEnMatriz(
                     palabra.Inicio.Fila,
                     palabra.Inicio.Columna,
                     palabra.Fin.Fila,
                     palabra.Fin.Columna,
-                    Brushes.LightGreen  // Color diferente para auto-encontradas
+                    Brushes.LightGreen
                 );
             }
         }
 
-        // ===== VALIDAR Y MARCAR SELECCIÓN DEL USUARIO =====
-        /// <summary>
-        /// Valida la selección del usuario y marca la palabra si es correcta
-        /// </summary>
+        // ===== MANEJO DE SELECCIÓN DEL USUARIO =====
+        private void CeldaPresionada(CeldaViewModel celda)
+        {
+            _celdaInicio = celda;
+            _seleccionando = true;
+            celda.ColorTemporal = Brushes.Yellow;
+        }
+
+        private void CeldaSoltada(CeldaViewModel celda)
+        {
+            if (_seleccionando && _celdaInicio != null)
+            {
+                _seleccionando = false;
+
+                // Validar selección
+                ValidarYMarcarSeleccion(
+                    _celdaInicio.Fila,
+                    _celdaInicio.Columna,
+                    celda.Fila,
+                    celda.Columna
+                );
+
+                // Limpiar resaltado temporal
+                LimpiarSeleccionTemporal();
+                _celdaInicio = null;
+            }
+        }
+
+        private void LimpiarSeleccionTemporal()
+        {
+            foreach (var fila in Matriz)
+            {
+                foreach (var celda in fila)
+                {
+                    if (!celda.EstaSeleccionada)
+                    {
+                        celda.Color = Brushes.White;
+                    }
+                }
+            }
+        }
+
+        // ===== VALIDAR Y MARCAR SELECCIÓN =====
         public void ValidarYMarcarSeleccion(int filaInicio, int colInicio, int filaFin, int colFin)
         {
             if (_estadoActual == null) return;
 
-            // Llamar a función F# pura para validación
             var resultado = SopaLetras.validarSeleccion(
                 _estadoActual,
                 filaInicio,
@@ -133,7 +191,6 @@ namespace Proyecto2_Lenguajes.GUI.ViewModels
 
             if (esValida && palabraEncontrada != null)
             {
-                // Palabra correcta encontrada por el usuario
                 MostrarPalabraEncontrada(
                     palabraEncontrada.Value,
                     filaInicio,
@@ -144,15 +201,10 @@ namespace Proyecto2_Lenguajes.GUI.ViewModels
             }
             else
             {
-                // Selección incorrecta
                 MostrarError();
             }
         }
 
-        // ===== MOSTRAR PALABRA ENCONTRADA =====
-        /// <summary>
-        /// Muestra feedback visual cuando el usuario encuentra una palabra correcta
-        /// </summary>
         private void MostrarPalabraEncontrada(
             string palabra,
             int filaInicio,
@@ -160,27 +212,17 @@ namespace Proyecto2_Lenguajes.GUI.ViewModels
             int filaFin,
             int colFin)
         {
-            // Marcar palabra en la matriz con color de usuario
-            MarcarPalabraEnMatriz(
-                filaInicio,
-                colInicio,
-                filaFin,
-                colFin,
-                Brushes.LightBlue  // Color para palabras encontradas por usuario
-            );
+            MarcarPalabraEnMatriz(filaInicio, colInicio, filaFin, colFin, Brushes.LightBlue);
 
-            // Mover de "por encontrar" a "encontradas"
             PalabrasPorEncontrar.Remove(palabra);
             if (!PalabrasEncontradas.Contains(palabra))
             {
                 PalabrasEncontradas.Add(palabra);
             }
 
-            // Mostrar mensaje de éxito
             MensajeEstado = $"¡Correcto! Encontraste: {palabra.ToUpper()}";
             ColorMensaje = Brushes.Green;
 
-            // Verificar si ganó
             if (PalabrasPorEncontrar.Count == 0)
             {
                 MensajeEstado = "🎉 ¡FELICITACIONES! Encontraste todas las palabras";
@@ -188,27 +230,20 @@ namespace Proyecto2_Lenguajes.GUI.ViewModels
             }
         }
 
-        // ===== MOSTRAR ERROR =====
-        /// <summary>
-        /// Muestra feedback visual cuando el usuario hace una selección incorrecta
-        /// </summary>
         private void MostrarError()
         {
             MensajeEstado = "❌ Esa palabra no está en la lista o ya fue encontrada";
             ColorMensaje = Brushes.Red;
 
-            // Opcional: hacer que el mensaje desaparezca después de 2 segundos
             System.Threading.Tasks.Task.Delay(2000).ContinueWith(_ =>
             {
-                MensajeEstado = "";
+                Dispatcher.UIThread.Post(() => {
+        MensajeEstado = "";  // ✅ Se ejecuta en thread de UI
+    });
                 ColorMensaje = Brushes.Black;
             });
         }
 
-        // ===== MARCAR PALABRA EN MATRIZ (HELPER) =====
-        /// <summary>
-        /// Marca visualmente una palabra en la matriz
-        /// </summary>
         private void MarcarPalabraEnMatriz(
             int filaInicio,
             int colInicio,
@@ -233,50 +268,136 @@ namespace Proyecto2_Lenguajes.GUI.ViewModels
             }
         }
 
-        // ===== CARGAR JUEGO DESDE ARCHIVO =====
-        /// <summary>
-        /// Carga palabras desde archivo y genera la sopa de letras
-        /// </summary>
-        public void CargarJuego(string rutaArchivo)
+        // ===== COMANDOS =====
+        private void CargarJuegoPorDificultad(string dificultad)
         {
+            System.Diagnostics.Debug.WriteLine($"CargarJuegoPorDificultad llamado: {dificultad}");
+
             try
             {
-                // Leer palabras del archivo
-                var palabras = File.ReadAllLines(rutaArchivo)
-                    .Where(linea => !string.IsNullOrWhiteSpace(linea))
-                    .Select(linea => linea.Trim().ToUpper())
-                    .ToList();
+                // Obtener palabras desde F#
+                var palabrasFSharp = SopaLetras.obtenerPalabrasPorDificultad(dificultad);
+                var palabras = Microsoft.FSharp.Collections.ListModule.ToArray(palabrasFSharp).ToList();
+
+                System.Diagnostics.Debug.WriteLine($"Palabras cargadas desde F#: {palabras.Count}");
 
                 if (palabras.Count == 0)
                 {
-                    MostrarError();
-                    MensajeEstado = "❌ El archivo no contiene palabras válidas";
+                    MensajeEstado = "❌ No hay palabras disponibles";
+                    ColorMensaje = Brushes.Red;
                     return;
                 }
 
-                // Generar matriz (aquí necesitarías tu función generadora en F#)
-                // Por ahora, asumiendo que tienes una función GenerarMatriz
+                // Generar matriz usando F#
                 var matriz = SopaLetras.GenerarMatriz(
-                    Microsoft.FSharp.Collections.ListModule.OfSeq(palabras),
-                    15,  // tamaño de la matriz
+                    palabrasFSharp,
+                    15,
                     15
                 );
 
-                // Resolver automáticamente (encuentra todas las palabras)
-                var estado = SopaLetras.resolverAutomatico(matriz,
-                    Microsoft.FSharp.Collections.ListModule.OfSeq(palabras));
+                // Crear estado inicial
+                var estado = SopaLetras.resolverAutomatico(
+                    matriz,
+                    palabrasFSharp
+                );
 
-                // Actualizar UI
                 ActualizarMatriz(estado);
 
-                MensajeEstado = $"Juego cargado. Encuentra {palabras.Count} palabras";
+                MensajeEstado = $"✅ Juego {dificultad} cargado. Encuentra {palabras.Count} palabras";
                 ColorMensaje = Brushes.Blue;
             }
             catch (Exception ex)
             {
-                MensajeEstado = $"❌ Error al cargar archivo: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"Error en CargarJuegoPorDificultad: {ex.Message}");
+                MensajeEstado = $"❌ Error al cargar juego: {ex.Message}";
                 ColorMensaje = Brushes.Red;
             }
+        }
+
+        private void CargarJuegoPorTema(string tema)
+        {
+            System.Diagnostics.Debug.WriteLine($"CargarJuegoPorTema llamado: {tema}");
+
+            try
+            {
+                // Obtener palabras desde F#
+                var palabrasFSharp = SopaLetras.obtenerPalabrasPorTema(tema);
+                var palabras = Microsoft.FSharp.Collections.ListModule.ToArray(palabrasFSharp).ToList();
+
+                System.Diagnostics.Debug.WriteLine($"Palabras del tema {tema}: {palabras.Count}");
+
+                if (palabras.Count == 0)
+                {
+                    MensajeEstado = "❌ No hay palabras disponibles para este tema";
+                    ColorMensaje = Brushes.Red;
+                    return;
+                }
+
+                // Generar matriz usando F#
+                var matriz = SopaLetras.GenerarMatriz(
+                    palabrasFSharp,
+                    15,
+                    15
+                );
+
+                // Crear estado inicial
+                var estado = SopaLetras.resolverAutomatico(
+                    matriz,
+                    palabrasFSharp
+                );
+
+                ActualizarMatriz(estado);
+
+                MensajeEstado = $"✅ Tema {tema} cargado. Encuentra {palabras.Count} palabras";
+                ColorMensaje = Brushes.Blue;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error en CargarJuegoPorTema: {ex.Message}");
+                MensajeEstado = $"❌ Error al cargar tema: {ex.Message}";
+                ColorMensaje = Brushes.Red;
+            }
+        }
+
+        private void ResolverAutomatico()
+        {
+            System.Diagnostics.Debug.WriteLine("ResolverAutomatico llamado");
+
+            if (_estadoActual == null)
+            {
+                MensajeEstado = "⚠️ Primero debes cargar un juego";
+                ColorMensaje = Brushes.Orange;
+                return;
+            }
+
+            try
+            {
+                var estadoResuelto = SopaLetras.resolverAutomatico(
+                    _estadoActual.Matriz,
+                    Microsoft.FSharp.Collections.ListModule.OfSeq(_estadoActual.PalabrasObjetivo)
+                );
+
+                ActualizarMatriz(estadoResuelto);
+                MensajeEstado = "✅ Todas las palabras han sido encontradas automáticamente";
+                ColorMensaje = Brushes.Blue;
+            }
+            catch (Exception ex)
+            {
+                MensajeEstado = $"❌ Error al resolver: {ex.Message}";
+                ColorMensaje = Brushes.Red;
+            }
+        }
+
+        private void Reiniciar()
+        {
+            System.Diagnostics.Debug.WriteLine("Reiniciar llamado");
+
+            Matriz.Clear();
+            PalabrasPorEncontrar.Clear();
+            PalabrasEncontradas.Clear();
+            _estadoActual = null;
+            MensajeEstado = "🔄 Juego reiniciado. Selecciona un nivel de dificultad para comenzar";
+            ColorMensaje = Brushes.Gray;
         }
     }
 }
