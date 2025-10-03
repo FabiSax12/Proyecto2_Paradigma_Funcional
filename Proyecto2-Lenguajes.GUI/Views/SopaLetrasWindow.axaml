@@ -4,235 +4,93 @@
         x:Class="Proyecto2_Lenguajes.GUI.Views.SopaLetrasWindow"
         x:DataType="vm:SopaLetrasViewModel"
         Title="Sopa de Letras"
-        Width="900" Height="700">
+        Width="800" Height="700"
+        WindowStartupLocation="CenterScreen">
 
     <Design.DataContext>
         <vm:SopaLetrasViewModel/>
     </Design.DataContext>
 
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-
-        <!-- Botones de control -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10" HorizontalAlignment="Center">
-            <TextBlock Text="🎮 Dificultad: "
-                       VerticalAlignment="Center"
-                       FontSize="14"
-                       FontWeight="Bold"
-                       Margin="0,0,10,0"/>
-            <Button Content="😊 Fácil"
-                    Command="{Binding CargarJuegoFacilCommand}"
-                    Background="#90EE90"
-                    Margin="0,0,5,0"
-                    Padding="15,8"/>
-            <Button Content="🤔 Medio"
-                    Command="{Binding CargarJuegoMedioCommand}"
-                    Background="#FFD700"
-                    Margin="0,0,5,0"
-                    Padding="15,8"/>
-            <Button Content="😤 Difícil"
-                    Command="{Binding CargarJuegoDificilCommand}"
-                    Background="#FF6347"
-                    Margin="0,0,20,0"
-                    Padding="15,8"/>
-
-            <Separator Width="2" Background="#DDD" Margin="10,0"/>
-
-            <Button Content="🐾 Tema: Animales"
-                    Command="{Binding CargarPorTemaCommand}"
-                    Background="#E6E6FA"
-                    Margin="10,0,5,0"
-                    Padding="15,8"/>
-            <Button Content="🤖 Resolver"
-                    Command="{Binding ResolverAutomaticoCommand}"
-                    Background="#87CEEB"
-                    Margin="0,0,5,0"
-                    Padding="15,8"/>
-            <Button Content="🔄 Reiniciar"
-                    Command="{Binding ReiniciarCommand}"
-                    Background="#FFA07A"
-                    Padding="15,8"/>
+    <Grid Margin="20" RowDefinitions="Auto,*,Auto">
+        
+        <!-- Título -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="🔤 SOPA DE LETRAS"
+                      FontSize="24"
+                      FontWeight="Bold"
+                      HorizontalAlignment="Center"/>
+            <TextBlock Text="{Binding EstadoJuego}"
+                      FontSize="14"
+                      HorizontalAlignment="Center"
+                      Margin="0,10,0,0"/>
         </StackPanel>
 
-        <!-- Mensaje de estado -->
-        <Border Grid.Row="1"
-                Background="#F0F0F0"
+        <!-- Matriz de la Sopa -->
+        <Border Grid.Row="1" 
+                BorderBrush="Gray" 
+                BorderThickness="2" 
                 CornerRadius="5"
-                Padding="10"
-                Margin="0,0,0,15">
-            <TextBlock Text="{Binding MensajeEstado}"
-                       Foreground="{Binding ColorMensaje}"
-                       FontSize="16"
-                       FontWeight="Bold"
-                       TextAlignment="Center"
-                       TextWrapping="Wrap"/>
-        </Border>
-
-        <!-- Contenedor principal con cuadrícula y listas -->
-        <Grid Grid.Row="2" ColumnDefinitions="Auto,*">
-
-            <!-- CUADRÍCULA DE SOPA DE LETRAS -->
-            <Border Grid.Column="0"
-                    BorderBrush="#333"
-                    BorderThickness="2"
-                    CornerRadius="5"
-                    Padding="10"
-                    Background="White"
-                    Margin="0,0,20,0">
-                <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Auto">
-                    <ItemsControl ItemsSource="{Binding Matriz}"
-                                  Name="MatrizControl">
-                        <!-- Panel para apilar filas verticalmente -->
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Vertical"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-
-                        <!-- Template para cada fila -->
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <ItemsControl ItemsSource="{Binding}">
-                                    <!-- Panel para apilar celdas horizontalmente -->
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Horizontal"/>
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-
-                                    <!-- Template para cada celda -->
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border Width="35" Height="35"
-                                                    Background="{Binding Color}"
-                                                    BorderBrush="#999"
-                                                    BorderThickness="1"
-                                                    Cursor="Hand"
-                                                    Name="CeldaBorder">
-                                                <TextBlock Text="{Binding Letra}"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"
-                                                           FontSize="16"
-                                                           FontWeight="Bold"
-                                                           FontFamily="Consolas"/>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-            </Border>
-
-            <!-- PANEL LATERAL CON LISTAS -->
-            <Grid Grid.Column="1">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <!-- Palabras por encontrar -->
-                <Border Grid.Row="0"
-                        BorderBrush="#DDD"
-                        BorderThickness="1"
-                        CornerRadius="5"
-                        Padding="15"
-                        Margin="0,0,0,10"
-                        Background="#FFFAF0">
-                    <StackPanel>
-                        <TextBlock Text="📝 Palabras por encontrar"
-                                   FontSize="18"
-                                   FontWeight="Bold"
-                                   Foreground="#D2691E"
-                                   Margin="0,0,0,10"/>
-                        <TextBlock Text="{Binding PalabrasPorEncontrar.Count, StringFormat='Quedan: {0}'}"
-                                   FontSize="14"
-                                   Foreground="#666"
-                                   Margin="0,0,0,10"/>
-                        <ScrollViewer>
-                            <ItemsControl ItemsSource="{Binding PalabrasPorEncontrar}">
+                Background="White"
+                Padding="10">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" 
+                         VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding FilasMatriz}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical" Spacing="2"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <!-- Cada fila -->
+                            <ItemsControl ItemsSource="{Binding}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="2"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Background="#FFF"
-                                                BorderBrush="#DDD"
-                                                BorderThickness="1"
-                                                CornerRadius="3"
-                                                Padding="8,5"
-                                                Margin="0,0,0,5">
+                                        <!-- Cada celda -->
+                                        <Border Width="35" Height="35"
+                                               Background="LightBlue"
+                                               BorderBrush="DarkBlue"
+                                               BorderThickness="1"
+                                               CornerRadius="3">
                                             <TextBlock Text="{Binding}"
-                                                       FontSize="14"
-                                                       Foreground="#333"/>
+                                                     FontSize="18"
+                                                     FontWeight="Bold"
+                                                     HorizontalAlignment="Center"
+                                                     VerticalAlignment="Center"/>
                                         </Border>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-                        </ScrollViewer>
-                    </StackPanel>
-                </Border>
-
-                <!-- Palabras encontradas -->
-                <Border Grid.Row="1"
-                        BorderBrush="#DDD"
-                        BorderThickness="1"
-                        CornerRadius="5"
-                        Padding="15"
-                        Background="#F0FFF0">
-                    <StackPanel>
-                        <TextBlock Text="✅ Palabras encontradas"
-                                   FontSize="18"
-                                   FontWeight="Bold"
-                                   Foreground="#228B22"
-                                   Margin="0,0,0,10"/>
-                        <TextBlock Text="{Binding PalabrasEncontradas.Count, StringFormat='Encontradas: {0}'}"
-                                   FontSize="14"
-                                   Foreground="#666"
-                                   Margin="0,0,0,10"/>
-                        <ScrollViewer>
-                            <ItemsControl ItemsSource="{Binding PalabrasEncontradas}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Background="#E8F5E9"
-                                                BorderBrush="#81C784"
-                                                BorderThickness="1"
-                                                CornerRadius="3"
-                                                Padding="8,5"
-                                                Margin="0,0,0,5">
-                                            <TextBlock Text="{Binding}"
-                                                       FontSize="14"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="#2E7D32"/>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
-                    </StackPanel>
-                </Border>
-            </Grid>
-        </Grid>
-
-        <!-- Instrucciones al usuario -->
-        <Border Grid.Row="3"
-                Background="#E3F2FD"
-                CornerRadius="5"
-                Padding="10"
-                Margin="0,15,0,0">
-            <TextBlock TextWrapping="Wrap"
-                       FontSize="12"
-                       Foreground="#555">
-                <Run Text="💡 Instrucciones: " FontWeight="Bold"/>
-                <Run Text="1) Selecciona una dificultad o tema. "/>
-                <Run Text="2) Haz clic y arrastra sobre las letras para seleccionar una palabra. "/>
-                <Run Text="3) Si es correcta, se marcará en azul. "/>
-                <Run Text="4) Usa '🤖 Resolver' para encontrar todas las palabras automáticamente."/>
-            </TextBlock>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
         </Border>
+
+        <!-- Botones -->
+        <StackPanel Grid.Row="2" 
+                   Orientation="Horizontal" 
+                   HorizontalAlignment="Center"
+                   Spacing="10"
+                   Margin="0,20,0,0">
+            <!-- <Button Content="Cargar Palabras"
+                   Command="{Binding CargarPalabrasCommand}"
+                   Width="150"
+                   Height="40"/> -->
+            <Button Content="Generar Nueva Sopa"
+                   Command="{Binding GenerarNuevaSopaCommand}"
+                   Width="150"
+                   Height="40"/>
+            <Button Content="Volver"
+                   Command="{Binding VolverCommand}"
+                   Width="100"
+                   Height="40"/>
+        </StackPanel>
+
     </Grid>
 </Window>
