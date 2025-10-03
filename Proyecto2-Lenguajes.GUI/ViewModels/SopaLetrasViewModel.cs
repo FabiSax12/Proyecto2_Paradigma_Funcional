@@ -177,11 +177,12 @@ public class SopaLetrasViewModel : ViewModelBase
             
             // Marcar la palabra como encontrada
             _sopaActual = Validations.marcarPalabraEncontrada(_sopaActual, palabraEncontrada);
-            
+
             // Añadir a la lista de palabras encontradas
             if (!_palabrasEncontradas.Contains(palabraEncontrada.Palabra.ToUpper()))
             {
                 _palabrasEncontradas.Add(palabraEncontrada.Palabra.ToUpper());
+                _palabrasEnSopa.Remove(palabraEncontrada.Palabra.ToUpper());
             }
 
             // Colorear el camino
@@ -243,11 +244,12 @@ public class SopaLetrasViewModel : ViewModelBase
         if (_sopaActual == null) return;
 
         // Usar la función de F# para encontrar todas las soluciones
-        var soluciones = SopaLetras.encontrarTodasSoluciones(_sopaActual);
+        var soluciones = SopaLetras.encontrarTodasSoluciones(_sopaActual, Microsoft.FSharp.Collections.ListModule.OfSeq(_palabrasEncontradas));
 
         foreach (var solucion in soluciones)
         {
             // Colorear en azul claro las soluciones automáticas
+
             ColorearCamino(solucion.Inicio, solucion.Fin, solucion.Direccion, Brushes.LightBlue);
         }
 

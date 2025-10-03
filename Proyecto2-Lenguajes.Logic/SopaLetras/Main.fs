@@ -175,8 +175,9 @@ module SopaLetras =
                   EncontradaPorUsuario = false })
     
     /// Busca todas las palabras en la sopa de letras de forma automática
-    let encontrarTodasSoluciones (sopa: SopaLetras) =
+    let encontrarTodasSoluciones (sopa: SopaLetras) (encontradasPorJugador: string list) =
         sopa.Palabras
+        |> List.filter (fun palabra -> not (List.contains palabra encontradasPorJugador))
         |> List.collect (fun palabra -> buscarPalabra sopa.Matriz palabra)
     
     // ============================================================================
@@ -191,9 +192,9 @@ module SopaLetras =
             |> List.fold max 0
         
         let cantidadPalabras = List.length palabras
-        let tamañoMinimo = max longitudMaxima 10
+        let tamañoMinimo = max longitudMaxima 5
         let tamañoOptimo = max tamañoMinimo (int (sqrt (float cantidadPalabras) * 5.0))
-        min tamañoOptimo 30 // Límite superior de 30x30
+        min tamañoOptimo 20 // Límite superior de 30x30
     
     /// Intenta colocar una palabra en una posición y dirección específicas
     let intentarColocarPalabra (matriz: char[,]) (palabra: string) pos direccion =
@@ -230,8 +231,8 @@ module SopaLetras =
     
     /// Genera una matriz de sopa de letras con las palabras dadas
     let generarSopaLetras (palabras: string list) (seed: int) =
-        let random = Random(seed)
-        let palabrasFiltradas = 
+        let random: Random = Random(seed)
+        let palabrasFiltradas: string list = 
             palabras 
             |> List.filter (fun p -> not (String.IsNullOrWhiteSpace(p)))
             |> List.distinct
