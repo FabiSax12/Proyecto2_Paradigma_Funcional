@@ -1,4 +1,3 @@
-using System;
 using Avalonia.Media;
 using ReactiveUI;
 
@@ -44,19 +43,5 @@ namespace Proyecto2_Lenguajes.GUI.ViewModels
 
         public int Fila { get; set; }
         public int Columna { get; set; }
-
-        // Eventos para manejar la selección
-        public event Action<CeldaViewModel>? OnCeldaPresionada;
-        public event Action<CeldaViewModel>? OnCeldaSoltada;
-
-        public void NotificarPresion()
-        {
-            OnCeldaPresionada?.Invoke(this);
-        }
-
-        public void NotificarSoltado()
-        {
-            OnCeldaSoltada?.Invoke(this);
-        }
     }
 }

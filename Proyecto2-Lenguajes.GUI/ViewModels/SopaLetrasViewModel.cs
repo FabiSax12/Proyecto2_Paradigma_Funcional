@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
+using Avalonia.Media;
 using ReactiveUI;
 using Proyecto2_Lenguajes.Logic.SopaLetras;
+using Avalonia.Threading;
 
 namespace Proyecto2_Lenguajes.GUI.ViewModels;
 
@@ -14,28 +15,46 @@ public class SopaLetrasViewModel : ViewModelBase
 {
     private readonly Window _window;
     private Types.SopaLetras? _sopaActual;
-    private ObservableCollection<ObservableCollection<string>> _filasMatriz;
+    private ObservableCollection<ObservableCollection<CeldaViewModel>> _filasMatriz;
+    private ObservableCollection<string> _palabrasEnSopa;
+    private ObservableCollection<string> _palabrasEncontradas;
     private string _estadoJuego;
+    private CeldaViewModel? _celdaInicio;
+    private CeldaViewModel? _celdaFin;
 
     public SopaLetrasViewModel(Window window)
     {
         _window = window;
-        _filasMatriz = new ObservableCollection<ObservableCollection<string>>();
+        _filasMatriz = new ObservableCollection<ObservableCollection<CeldaViewModel>>();
+        _palabrasEnSopa = new ObservableCollection<string>();
+        _palabrasEncontradas = new ObservableCollection<string>();
         _estadoJuego = "Cargando juego...";
 
-        // Comandos
-        CargarPalabrasCommand = ReactiveCommand.CreateFromTask(CargarPalabrasAsync);
-        GenerarNuevaSopaCommand = ReactiveCommand.Create(GenerarNuevaSopa);
-        VolverCommand = ReactiveCommand.Create(Volver);
+        // Comandos simples sin problemas de threading
+        GenerarNuevaSopaCommand = new SimpleCommand(GenerarNuevaSopa);
+        VolverCommand = new SimpleCommand(Volver);
+        MostrarSolucionesCommand = new SimpleCommand(MostrarSoluciones);
 
         // Generar sopa inicial con palabras de ejemplo
         GenerarSopaInicial();
     }
 
-    public ObservableCollection<ObservableCollection<string>> FilasMatriz
+    public ObservableCollection<ObservableCollection<CeldaViewModel>> FilasMatriz
     {
         get => _filasMatriz;
         set => this.RaiseAndSetIfChanged(ref _filasMatriz, value);
+    }
+
+    public ObservableCollection<string> PalabrasEnSopa
+    {
+        get => _palabrasEnSopa;
+        set => this.RaiseAndSetIfChanged(ref _palabrasEnSopa, value);
+    }
+
+    public ObservableCollection<string> PalabrasEncontradas
+    {
+        get => _palabrasEncontradas;
+        set => this.RaiseAndSetIfChanged(ref _palabrasEncontradas, value);
     }
 
     public string EstadoJuego
@@ -44,9 +63,9 @@ public class SopaLetrasViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _estadoJuego, value);
     }
 
-    public ICommand CargarPalabrasCommand { get; }
     public ICommand GenerarNuevaSopaCommand { get; }
     public ICommand VolverCommand { get; }
+    public ICommand MostrarSolucionesCommand { get; }
 
     private void GenerarSopaInicial()
     {
@@ -59,33 +78,45 @@ public class SopaLetrasViewModel : ViewModelBase
             "SOL",
             "LUNA",
             "ARBOL",
-            "FLOR"
+            "FLOR",
+            "AMOR",
+            "PAZ"
         };
+
+        _palabrasEnSopa = new ObservableCollection<string>(palabrasEjemplo);
+        _palabrasEncontradas = new ObservableCollection<string>();
 
         var palabrasFSharp = Microsoft.FSharp.Collections.ListModule.OfSeq(palabrasEjemplo);
         var seed = DateTime.Now.Millisecond;
-
+        
         _sopaActual = SopaLetras.generarSopaLetras(palabrasFSharp, seed);
-
+        
         ActualizarMatriz();
-
-        EstadoJuego = $"Sopa generada con {palabrasEjemplo.Count} palabras";
+        
+        EstadoJuego = $"Sopa generada con {palabrasEjemplo.Count} palabras. Selecciona inicio y fin de palabra.";
     }
 
     private void ActualizarMatriz()
     {
         if (_sopaActual == null) return;
 
-        var nuevasFilas = new ObservableCollection<ObservableCollection<string>>();
+        var nuevasFilas = new ObservableCollection<ObservableCollection<CeldaViewModel>>();
         var tamaño = _sopaActual.Tamaño;
 
         for (int fila = 0; fila < tamaño; fila++)
         {
-            var columnas = new ObservableCollection<string>();
+            var columnas = new ObservableCollection<CeldaViewModel>();
             for (int col = 0; col < tamaño; col++)
             {
                 char caracter = _sopaActual.Matriz[fila, col];
-                columnas.Add(caracter.ToString());
+                var celda = new CeldaViewModel
+                {
+                    Letra = caracter,
+                    Fila = fila,
+                    Columna = col
+                };
+
+                columnas.Add(celda);
             }
             nuevasFilas.Add(columnas);
         }
@@ -93,48 +124,137 @@ public class SopaLetrasViewModel : ViewModelBase
         FilasMatriz = nuevasFilas;
     }
 
-    private async Task CargarPalabrasAsync()
+    public void ManejadorCeldaClick(CeldaViewModel celda)
     {
-        try
+        if (_celdaInicio == null)
         {
-            var openFileDialog = new OpenFileDialog
-            {
-                Title = "Seleccionar archivo de palabras",
-                Filters = new List<FileDialogFilter>
-                {
-                    new FileDialogFilter { Name = "Archivos de texto", Extensions = { "txt" } },
-                    new FileDialogFilter { Name = "Todos los archivos", Extensions = { "*" } }
-                }
-            };
-
-            var result = await openFileDialog.ShowAsync(_window);
-
-            if (result != null && result.Length > 0)
-            {
-                var rutaArchivo = result[0];
-                var palabras = ReadFile.leerPalabrasDesdeArchivo(rutaArchivo);
-
-                if (Microsoft.FSharp.Collections.ListModule.IsEmpty(palabras))
-                {
-                    EstadoJuego = "No se pudieron cargar palabras del archivo";
-                    return;
-                }
-
-                var seed = DateTime.Now.Millisecond;
-                _sopaActual = SopaLetras.generarSopaLetras(palabras, seed);
-
-                ActualizarMatriz();
-
-                var cantidadPalabras = Microsoft.FSharp.Collections.ListModule.Length(palabras);
-                EstadoJuego = $"Sopa generada con {cantidadPalabras} palabras del archivo";
-            }
+            // Seleccionar inicio
+            _celdaInicio = celda;
+            celda.ColorTemporal = Brushes.Yellow;
+            celda.EstaSeleccionada = true;
+            
+            EstadoJuego = $"Inicio: ({celda.Fila}, {celda.Columna}). Ahora selecciona el final de la palabra.";
         }
-        catch (Exception ex)
+        else if (_celdaFin == null)
         {
-            EstadoJuego = $"Error al cargar archivo: {ex.Message}";
+            // Seleccionar fin y validar
+            _celdaFin = celda;
+            ValidarSeleccion();
+        }
+        else
+        {
+            // Ya hay una selección completa, resetear y empezar de nuevo
+            if (_celdaInicio != null && !_celdaInicio.EstaSeleccionada)
+            {
+                _celdaInicio.ColorTemporal = Brushes.White;
+            }
+            
+            _celdaInicio = celda;
+            _celdaFin = null;
+            celda.ColorTemporal = Brushes.Yellow;
+            celda.EstaSeleccionada = true;
+            
+            EstadoJuego = $"Inicio: ({celda.Fila}, {celda.Columna}). Ahora selecciona el final de la palabra.";
         }
     }
 
+    private void ValidarSeleccion()
+    {
+        if (_celdaInicio == null || _celdaFin == null || _sopaActual == null)
+            return;
+
+        // Crear posiciones para F#
+        var inicio = new Types.Posicion(_celdaInicio.Fila, _celdaInicio.Columna);
+        var fin = new Types.Posicion(_celdaFin.Fila, _celdaFin.Columna);
+
+        // Llamar a la función de validación de F#
+        var resultado = Validations.verificarSeleccion(_sopaActual, inicio, fin);
+
+        if (resultado != null)
+        {
+            // ¡Palabra encontrada!
+            var palabraEncontrada = resultado.Value;
+            
+            // Marcar la palabra como encontrada
+            _sopaActual = Validations.marcarPalabraEncontrada(_sopaActual, palabraEncontrada);
+            
+            // Añadir a la lista de palabras encontradas
+            if (!_palabrasEncontradas.Contains(palabraEncontrada.Palabra.ToUpper()))
+            {
+                _palabrasEncontradas.Add(palabraEncontrada.Palabra.ToUpper());
+            }
+
+            // Colorear el camino
+            ColorearCamino(inicio, fin, palabraEncontrada.Direccion, Brushes.LightGreen);
+
+            var progreso = Validations.obtenerProgreso(_sopaActual);
+            EstadoJuego = $"¡Correcto! Encontraste '{palabraEncontrada.Palabra}'. Progreso: {progreso:F1}%";
+
+            // Verificar si completó el juego
+            if (Validations.juegoCompletado(_sopaActual))
+            {
+                EstadoJuego = "¡FELICIDADES! Completaste la sopa de letras.";
+            }
+        }
+        else
+        {
+            // Selección incorrecta
+            EstadoJuego = "Selección incorrecta. Intenta de nuevo.";
+            
+            // Resetear colores temporales
+            if (_celdaInicio != null)
+            {
+                _celdaInicio.ColorTemporal = Brushes.White;
+                _celdaInicio.EstaSeleccionada = false;
+            }
+        }
+
+        // Limpiar selección
+        if (_celdaInicio != null && resultado == null)
+        {
+            _celdaInicio.ColorTemporal = Brushes.White;
+            _celdaInicio.EstaSeleccionada = false;
+        }
+        
+        _celdaInicio = null;
+        _celdaFin = null;
+    }
+
+    private void ColorearCamino(Types.Posicion inicio, Types.Posicion fin, Types.Direccion direccion, IBrush color)
+    {
+        var posActual = inicio;
+        
+        while (true)
+        {
+            var celda = FilasMatriz[posActual.Fila][posActual.Columna];
+            celda.Color = color;
+            celda.ColorTemporal = color;
+            celda.EstaSeleccionada = false;
+
+            if (posActual.Fila == fin.Fila && posActual.Columna == fin.Columna)
+                break;
+
+            posActual = Validations.moverPosicion(posActual, direccion);
+        }
+    }
+
+    private void MostrarSoluciones()
+    {
+        if (_sopaActual == null) return;
+
+        // Usar la función de F# para encontrar todas las soluciones
+        var soluciones = SopaLetras.encontrarTodasSoluciones(_sopaActual);
+
+        foreach (var solucion in soluciones)
+        {
+            // Colorear en azul claro las soluciones automáticas
+            ColorearCamino(solucion.Inicio, solucion.Fin, solucion.Direccion, Brushes.LightBlue);
+        }
+
+        var cantidadSoluciones = Microsoft.FSharp.Collections.ListModule.Length(soluciones);
+        EstadoJuego = $"Se encontraron {cantidadSoluciones} palabras automáticamente (en azul claro).";
+    }
+    
     private void GenerarNuevaSopa()
     {
         if (_sopaActual == null) return;
@@ -143,6 +263,7 @@ public class SopaLetrasViewModel : ViewModelBase
         var nuevoSeed = DateTime.Now.Millisecond;
 
         _sopaActual = SopaLetras.generarSopaLetras(palabras, nuevoSeed);
+        _palabrasEncontradas.Clear();
 
         ActualizarMatriz();
 
