@@ -90,9 +90,9 @@ public class SopaLetrasViewModel : ViewModelBase
 
         var palabrasFSharp = Microsoft.FSharp.Collections.ListModule.OfSeq(palabrasArchivo);
         var seed = DateTime.Now.Millisecond;
-        
+
         _sopaActual = SopaLetras.generarSopaLetras(palabrasFSharp, seed);
-        
+
         ActualizarMatriz();
 
         EstadoJuego = $"Sopa generada con {palabrasArchivo.Count} palabras. Selecciona inicio y fin de palabra.";
@@ -134,7 +134,7 @@ public class SopaLetrasViewModel : ViewModelBase
             _celdaInicio = celda;
             celda.ColorTemporal = Brushes.Yellow;
             celda.EstaSeleccionada = true;
-            
+
             EstadoJuego = $"Inicio: ({celda.Fila}, {celda.Columna}). Ahora selecciona el final de la palabra.";
         }
         else if (_celdaFin == null)
@@ -150,12 +150,12 @@ public class SopaLetrasViewModel : ViewModelBase
             {
                 _celdaInicio.ColorTemporal = Brushes.White;
             }
-            
+
             _celdaInicio = celda;
             _celdaFin = null;
             celda.ColorTemporal = Brushes.Yellow;
             celda.EstaSeleccionada = true;
-            
+
             EstadoJuego = $"Inicio: ({celda.Fila}, {celda.Columna}). Ahora selecciona el final de la palabra.";
         }
     }
@@ -176,7 +176,7 @@ public class SopaLetrasViewModel : ViewModelBase
         {
             // ¡Palabra encontrada!
             var palabraEncontrada = resultado.Value;
-            
+
             // Marcar la palabra como encontrada
             _sopaActual = Validations.marcarPalabraEncontrada(_sopaActual, palabraEncontrada);
 
@@ -203,11 +203,18 @@ public class SopaLetrasViewModel : ViewModelBase
         {
             // Selección incorrecta
             EstadoJuego = "Selección incorrecta. Intenta de nuevo.";
-            
+
             // Resetear colores temporales
             if (_celdaInicio != null)
             {
-                _celdaInicio.ColorTemporal = Brushes.White;
+                if (_celdaInicio.EsParteDePalabra)
+                {
+                    _celdaInicio.ColorTemporal = Brushes.LightGreen;
+                }
+                else
+                {
+                    _celdaInicio.ColorTemporal = Brushes.White;
+                }
                 _celdaInicio.EstaSeleccionada = false;
             }
         }
@@ -215,10 +222,17 @@ public class SopaLetrasViewModel : ViewModelBase
         // Limpiar selección
         if (_celdaInicio != null && resultado == null)
         {
-            _celdaInicio.ColorTemporal = Brushes.White;
+            if (_celdaInicio.EsParteDePalabra)
+            {
+                _celdaInicio.ColorTemporal = Brushes.LightGreen;
+            }
+            else
+            {
+                _celdaInicio.ColorTemporal = Brushes.White;
+            }
             _celdaInicio.EstaSeleccionada = false;
         }
-        
+
         _celdaInicio = null;
         _celdaFin = null;
     }
@@ -226,13 +240,14 @@ public class SopaLetrasViewModel : ViewModelBase
     private void ColorearCamino(Types.Posicion inicio, Types.Posicion fin, Types.Direccion direccion, IBrush color)
     {
         var posActual = inicio;
-        
+
         while (true)
         {
             var celda = FilasMatriz[posActual.Fila][posActual.Columna];
             celda.Color = color;
             celda.ColorTemporal = color;
             celda.EstaSeleccionada = false;
+            celda.EsParteDePalabra = true;
 
             if (posActual.Fila == fin.Fila && posActual.Columna == fin.Columna)
                 break;
@@ -258,7 +273,7 @@ public class SopaLetrasViewModel : ViewModelBase
         var cantidadSoluciones = Microsoft.FSharp.Collections.ListModule.Length(soluciones);
         EstadoJuego = $"Se encontraron {cantidadSoluciones} palabras automáticamente (en azul claro).";
     }
-    
+
     private void GenerarNuevaSopa()
     {
         if (_sopaActual == null) return;

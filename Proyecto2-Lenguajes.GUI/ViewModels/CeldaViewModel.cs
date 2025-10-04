@@ -9,6 +9,7 @@ namespace Proyecto2_Lenguajes.GUI.ViewModels
         private IBrush _color = Brushes.White;
         private IBrush _colorTemporal = Brushes.White;
         private bool _estaSeleccionada;
+        private bool _esParteDePalabra;
 
         public char Letra
         {
@@ -39,6 +40,12 @@ namespace Proyecto2_Lenguajes.GUI.ViewModels
         {
             get => _estaSeleccionada;
             set => this.RaiseAndSetIfChanged(ref _estaSeleccionada, value);
+        }
+
+        public bool EsParteDePalabra
+        {
+            get => _esParteDePalabra;
+            set => this.RaiseAndSetIfChanged(ref _esParteDePalabra, value);
         }
 
         public int Fila { get; set; }
