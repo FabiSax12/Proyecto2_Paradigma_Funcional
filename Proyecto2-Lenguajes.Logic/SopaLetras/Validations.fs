@@ -17,7 +17,7 @@ module Validations =
         | DiagonalIzquierdaInversa -> { Fila = pos.Fila - 1; Columna = pos.Columna + 1 }
 
     /// Verifica si una selección del usuario es correcta
-    let verificarSeleccion (sopa: SopaLetras) inicio fin =
+    let verificarSeleccion (sopa: SopaLetras) (palabrasEncontradas: string list) inicio fin =
         let deltaFila = fin.Fila - inicio.Fila
         let deltaCol = fin.Columna - inicio.Columna
         
@@ -47,6 +47,12 @@ module Validations =
             
             let palabraSeleccionada = extraerPalabra inicio ""
             
+            // Verificar si la palabra ya se seleccionó antes
+            if List.exists (fun (p: string) -> p.ToUpper() = palabraSeleccionada.ToUpper()) palabrasEncontradas then
+                None
+            else
+
+
             // Verificar si la palabra está en la lista
             sopa.Palabras
             |> List.tryFind (fun p -> p.ToUpper() = palabraSeleccionada.ToUpper())

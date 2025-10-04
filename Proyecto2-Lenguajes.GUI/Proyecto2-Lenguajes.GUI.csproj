@@ -26,4 +26,10 @@
   <ItemGroup>
     <ProjectReference Include="..\Proyecto2-Lenguajes.Logic\Proyecto2-Lenguajes.Logic.fsproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="palabras.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

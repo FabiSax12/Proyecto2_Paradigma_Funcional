@@ -7,7 +7,7 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using ReactiveUI;
 using Proyecto2_Lenguajes.Logic.SopaLetras;
-using Avalonia.Threading;
+using System.IO;
 
 namespace Proyecto2_Lenguajes.GUI.ViewModels;
 
@@ -83,17 +83,19 @@ public class SopaLetrasViewModel : ViewModelBase
             "PAZ"
         };
 
-        _palabrasEnSopa = new ObservableCollection<string>(palabrasEjemplo);
+        List<string> palabrasArchivo = File.ReadAllLines("palabras.txt").ToList();
+
+        _palabrasEnSopa = new ObservableCollection<string>(palabrasArchivo);
         _palabrasEncontradas = new ObservableCollection<string>();
 
-        var palabrasFSharp = Microsoft.FSharp.Collections.ListModule.OfSeq(palabrasEjemplo);
+        var palabrasFSharp = Microsoft.FSharp.Collections.ListModule.OfSeq(palabrasArchivo);
         var seed = DateTime.Now.Millisecond;
         
         _sopaActual = SopaLetras.generarSopaLetras(palabrasFSharp, seed);
         
         ActualizarMatriz();
-        
-        EstadoJuego = $"Sopa generada con {palabrasEjemplo.Count} palabras. Selecciona inicio y fin de palabra.";
+
+        EstadoJuego = $"Sopa generada con {palabrasArchivo.Count} palabras. Selecciona inicio y fin de palabra.";
     }
 
     private void ActualizarMatriz()
@@ -168,7 +170,7 @@ public class SopaLetrasViewModel : ViewModelBase
         var fin = new Types.Posicion(_celdaFin.Fila, _celdaFin.Columna);
 
         // Llamar a la función de validación de F#
-        var resultado = Validations.verificarSeleccion(_sopaActual, inicio, fin);
+        var resultado = Validations.verificarSeleccion(_sopaActual, Microsoft.FSharp.Collections.ListModule.OfSeq(_palabrasEncontradas), inicio, fin);
 
         if (resultado != null)
         {
