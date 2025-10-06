@@ -21,7 +21,7 @@ public class SopaLetrasViewModel : ViewModelBase
     private string _estadoJuego;
     private CeldaViewModel? _celdaInicio;
     private CeldaViewModel? _celdaFin;
-    private bool _solucionesMostradas;
+    private bool _juegoTerminado = false;
 
     public SopaLetrasViewModel(Window window)
     {
@@ -128,9 +128,9 @@ public class SopaLetrasViewModel : ViewModelBase
 
     public void ManejadorCeldaClick(CeldaViewModel celda)
     {
-        if (_solucionesMostradas)
+        if (_juegoTerminado)
         {
-            EstadoJuego = "Las soluciones ya fueron mostradas. Genera una nueva sopa para seguir jugando.";
+            EstadoJuego = "Esta partida ha finalizado. Genera una nueva sopa para seguir jugando.";
             return;
         }
         if (_celdaInicio == null)
@@ -201,6 +201,7 @@ public class SopaLetrasViewModel : ViewModelBase
             // Verificar si completó el juego
             if (Validations.juegoCompletado(_sopaActual))
             {
+                _juegoTerminado = true;
                 EstadoJuego = "¡FELICIDADES! Completaste la sopa de letras.";
             }
         }
@@ -277,7 +278,7 @@ public class SopaLetrasViewModel : ViewModelBase
 
         var cantidadSoluciones = Microsoft.FSharp.Collections.ListModule.Length(soluciones);
         EstadoJuego = $"Se encontraron {cantidadSoluciones} palabras automáticamente (en azul claro).";
-        _solucionesMostradas = true;
+        _juegoTerminado = true;
     }
 
     private void GenerarNuevaSopa()
@@ -304,7 +305,7 @@ public class SopaLetrasViewModel : ViewModelBase
 
         var cantidadPalabras = Microsoft.FSharp.Collections.ListModule.Length(palabras);
         EstadoJuego = $"Nueva sopa generada con {cantidadPalabras} palabras";
-        _solucionesMostradas = false;
+        _juegoTerminado = false;
     }
 
     private void Volver()
