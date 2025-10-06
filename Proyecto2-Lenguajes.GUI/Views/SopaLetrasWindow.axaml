@@ -5,7 +5,9 @@
     xmlns:vm="using:Proyecto2_Lenguajes.GUI.ViewModels"
     x:Name="RootWindow"
     Title="Sopa de Letras"
-    Width="1000"
+    SizeToContent="WidthAndHeight"
+    MinWidth="800"
+    MaxWidth="1400"
     Height="700"
     x:DataType="vm:SopaLetrasViewModel"
     WindowStartupLocation="CenterScreen">
