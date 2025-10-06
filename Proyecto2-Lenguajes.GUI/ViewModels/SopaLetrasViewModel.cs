@@ -21,6 +21,7 @@ public class SopaLetrasViewModel : ViewModelBase
     private string _estadoJuego;
     private CeldaViewModel? _celdaInicio;
     private CeldaViewModel? _celdaFin;
+    private bool _solucionesMostradas;
 
     public SopaLetrasViewModel(Window window)
     {
@@ -69,21 +70,8 @@ public class SopaLetrasViewModel : ViewModelBase
 
     private void GenerarSopaInicial()
     {
-        // Palabras de ejemplo para empezar
-        var palabrasEjemplo = new List<string>
-        {
-            "CASA",
-            "PERRO",
-            "GATO",
-            "SOL",
-            "LUNA",
-            "ARBOL",
-            "FLOR",
-            "AMOR",
-            "PAZ"
-        };
-
-        List<string> palabrasArchivo = File.ReadAllLines("palabras.txt").ToList();
+        string rutaArchivo = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "palabras.txt");
+        List<string> palabrasArchivo = ReadFile.procesarLineas(File.ReadAllLines(rutaArchivo).ToArray()).ToList();
 
         _palabrasEnSopa = new ObservableCollection<string>(palabrasArchivo);
         _palabrasEncontradas = new ObservableCollection<string>();
@@ -91,7 +79,7 @@ public class SopaLetrasViewModel : ViewModelBase
         var palabrasFSharp = Microsoft.FSharp.Collections.ListModule.OfSeq(palabrasArchivo);
         var seed = DateTime.Now.Millisecond;
 
-        _sopaActual = SopaLetras.generarSopaLetras(palabrasFSharp, seed);
+        _sopaActual = Generador.generarSopaLetras(palabrasFSharp, seed);
 
         ActualizarMatriz();
 
@@ -128,6 +116,11 @@ public class SopaLetrasViewModel : ViewModelBase
 
     public void ManejadorCeldaClick(CeldaViewModel celda)
     {
+        if (_solucionesMostradas)
+        {
+            EstadoJuego = "Las soluciones ya fueron mostradas. Genera una nueva sopa para seguir jugando.";
+            return;
+        }
         if (_celdaInicio == null)
         {
             // Seleccionar inicio
@@ -261,7 +254,7 @@ public class SopaLetrasViewModel : ViewModelBase
         if (_sopaActual == null) return;
 
         // Usar la función de F# para encontrar todas las soluciones
-        var soluciones = SopaLetras.encontrarTodasSoluciones(_sopaActual, Microsoft.FSharp.Collections.ListModule.OfSeq(_palabrasEncontradas));
+        var soluciones = BusquedaPalabras.encontrarTodasSoluciones(_sopaActual, Microsoft.FSharp.Collections.ListModule.OfSeq(_palabrasEncontradas));
 
         foreach (var solucion in soluciones)
         {
@@ -272,6 +265,7 @@ public class SopaLetrasViewModel : ViewModelBase
 
         var cantidadSoluciones = Microsoft.FSharp.Collections.ListModule.Length(soluciones);
         EstadoJuego = $"Se encontraron {cantidadSoluciones} palabras automáticamente (en azul claro).";
+        _solucionesMostradas = true;
     }
 
     private void GenerarNuevaSopa()
@@ -281,13 +275,24 @@ public class SopaLetrasViewModel : ViewModelBase
         var palabras = _sopaActual.Palabras;
         var nuevoSeed = DateTime.Now.Millisecond;
 
-        _sopaActual = SopaLetras.generarSopaLetras(palabras, nuevoSeed);
+        _sopaActual = Generador.generarSopaLetras(palabras, nuevoSeed);
+
+        // Reincorporar palabras encontradas a la lista de palabras disponibles
+        foreach (var palabra in _palabrasEncontradas)
+        {
+            if (!_palabrasEnSopa.Contains(palabra))
+            {
+                _palabrasEnSopa.Add(palabra);
+            }
+        }
+
         _palabrasEncontradas.Clear();
 
         ActualizarMatriz();
 
         var cantidadPalabras = Microsoft.FSharp.Collections.ListModule.Length(palabras);
         EstadoJuego = $"Nueva sopa generada con {cantidadPalabras} palabras";
+        _solucionesMostradas = false;
     }
 
     private void Volver()

@@ -28,8 +28,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="palabras.txt">
+    <None Update="palabras.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </None>
   </ItemGroup>
 </Project>
