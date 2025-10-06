@@ -71,7 +71,12 @@ public class SopaLetrasViewModel : ViewModelBase
     private void GenerarSopaInicial()
     {
         string rutaArchivo = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "palabras.txt");
-        List<string> palabrasArchivo = ReadFile.procesarLineas(File.ReadAllLines(rutaArchivo).ToArray()).ToList();
+        var lineasOriginales = File.ReadAllLines(rutaArchivo);
+        List<string> palabrasArchivo = ReadFile.procesarLineas(lineasOriginales.ToArray()).ToList();
+
+        // Informar si se filtraron palabras por longitud
+        int palabrasOriginales = lineasOriginales.Count(l => !string.IsNullOrWhiteSpace(l));
+        int palabrasDescartadas = palabrasOriginales - palabrasArchivo.Count;
 
         _palabrasEnSopa = new ObservableCollection<string>(palabrasArchivo);
         _palabrasEncontradas = new ObservableCollection<string>();
@@ -83,7 +88,14 @@ public class SopaLetrasViewModel : ViewModelBase
 
         ActualizarMatriz();
 
-        EstadoJuego = $"Sopa generada con {palabrasArchivo.Count} palabras. Selecciona inicio y fin de palabra.";
+        if (palabrasDescartadas > 0)
+        {
+            EstadoJuego = $"Sopa generada con {palabrasArchivo.Count} palabras ({palabrasDescartadas} descartadas por exceder longitud máxima de {ReadFile.longitudMaximaPalabra}).";
+        }
+        else
+        {
+            EstadoJuego = $"Sopa generada con {palabrasArchivo.Count} palabras. Selecciona inicio y fin de palabra.";
+        }
     }
 
     private void ActualizarMatriz()
