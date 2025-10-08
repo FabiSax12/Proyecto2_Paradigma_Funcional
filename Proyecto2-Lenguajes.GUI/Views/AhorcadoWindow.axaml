@@ -1,0 +1,43 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Proyecto2_Lenguajes.GUI.ViewModels"
+        x:Class="Proyecto2_Lenguajes.GUI.Views.AhorcadoWindow"
+        x:DataType="vm:AhorcadoViewModel"
+        Title="Juego del Ahorcado"
+        Width="600" Height="450"
+        WindowStartupLocation="CenterScreen"
+        CanResize="False">
+
+    <Design.DataContext>
+        <vm:AhorcadoViewModel/>
+    </Design.DataContext>
+
+    <Grid Margin="20" RowDefinitions="Auto, *, Auto, Auto" HorizontalAlignment="Center">
+
+        <TextBlock Grid.Row="0" Text="Juego del Ahorcado" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,10,0,20" />
+
+        <StackPanel Grid.Row="1" Spacing="15" VerticalAlignment="Center">
+            <!-- El Viewbox escala la palabra para que quepa sin importar la longitud -->
+            <Viewbox MaxWidth="500" Stretch="Uniform" Margin="0,10">
+                <TextBlock Text="{Binding PalabraMostrada}" FontSize="36" FontWeight="Bold" LetterSpacing="8" HorizontalAlignment="Center"/>
+            </Viewbox>
+            <TextBlock Text="Letras usadas:" FontSize="14" Margin="0,10,0,0"/>
+            <TextBlock Text="{Binding LetrasUsadas}" FontSize="16" Foreground="DarkSlateGray" TextWrapping="Wrap"/>
+            <TextBlock Text="{Binding IntentosRestantes, StringFormat='Intentos restantes: {0}'}" FontSize="16" FontWeight="SemiBold"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" IsVisible="{Binding JuegoActivo}">
+            <TextBox Name="InputLetra" Width="50" MaxLength="1" FontSize="20" TextAlignment="Center"/>
+            <!-- IsDefault=True activa el botón con la tecla Enter -->
+            <Button Content="Intentar" FontSize="18" Padding="15,5"
+                    IsDefault="True"
+                    Command="{Binding IntentarLetraCommand}"
+                    CommandParameter="{Binding #InputLetra}"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="3" Spacing="10" HorizontalAlignment="Center" Margin="0,20,0,0">
+            <TextBlock Text="{Binding MensajeFinal}" FontSize="20" FontWeight="Bold" Foreground="ForestGreen" HorizontalAlignment="Center"/>
+            <Button Content="Nuevo Juego" FontSize="18" Padding="15,5" IsVisible="{Binding !JuegoActivo}" Command="{Binding NuevoJuegoCommand}"/>
+        </StackPanel>
+    </Grid>
+</Window>
