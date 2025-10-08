@@ -8,10 +8,12 @@ type EstadoJuego = {
     IntentosRestantes: int
 }
 
+type DatosVictoria = { Tiempo: float } 
+
 type Resultado =
-    | Victoria of Tiempo: float
-    | Derrota
-    | EnJuego
+    | Victoria of DatosVictoria
+    | Derrota  
+    | EnJuego  
 
 /// <summary>
 /// Inicia un nuevo juego seleccionando una palabra aleatoria de la lista.
@@ -64,7 +66,8 @@ let verificarEstado (estado: EstadoJuego) (tiempoTranscurrido: float) =
         |> Seq.forall (fun c -> estado.LetrasAdivinadas.Contains(c))
 
     if palabraAdivinada then
-        Victoria { Tiempo = tiempoTranscurrido }
+        let datosVictoria = { Tiempo = tiempoTranscurrido }
+        Victoria datosVictoria
     elif estado.IntentosRestantes <= 0 then
         Derrota
     else

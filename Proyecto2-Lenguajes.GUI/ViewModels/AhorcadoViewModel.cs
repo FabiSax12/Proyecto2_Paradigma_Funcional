@@ -5,10 +5,11 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Proyecto2_Lenguajes.Logic;
 using System.Diagnostics;
+using Ahorcado = Proyecto2_Lenguajes.Logic.Ahorcado;
 
 namespace Proyecto2_Lenguajes.GUI.ViewModels;
 
-public partial class AhorcadoViewModel : ViewModelBase
+public partial class AhorcadoViewModel : ObservableObject
 {
     [ObservableProperty]
     private string _palabraMostrada = "";
@@ -26,7 +27,7 @@ public partial class AhorcadoViewModel : ViewModelBase
     [ObservableProperty]
     private bool _juegoActivo = true;
     
-    private Ahorcado.EstadoJuego _estadoActual;
+    private Ahorcado.EstadoJuego _estadoActual = null!;
     private readonly string[] _palabras;
     private const int MAX_INTENTOS = 6; // Cabeza, cuerpo, 2 brazos, 2 piernas
     private readonly Stopwatch _cronometro = new();
@@ -91,7 +92,7 @@ public partial class AhorcadoViewModel : ViewModelBase
             MensajeFinal = $"¡GANASTE! Tiempo: {victoria.Item.Tiempo:F2}s";
             JuegoActivo = false;
         }
-        else if (resultado is Ahorcado.Resultado.Derrota)
+        else if (resultado.IsDerrota)
         {
             _cronometro.Stop();
             MensajeFinal = $"¡PERDISTE! La palabra era: {_estadoActual.PalabraSecreta}";
