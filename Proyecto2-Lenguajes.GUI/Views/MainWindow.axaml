@@ -4,7 +4,7 @@
         x:Class="Proyecto2_Lenguajes.GUI.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="Proyecto F# - Selector de Juegos"
-        Width="500" Height="400"
+        Width="500" Height="460"
         WindowStartupLocation="CenterScreen">
 
     <Design.DataContext>
@@ -47,6 +47,18 @@
                 Height="60"
                 HorizontalAlignment="Center"
                 Background="LightGreen"
+                CornerRadius="10"/>
+
+        <!-- Botón Sopa de Letras -->
+        <Button Content="SALIR"
+                Command="{Binding SalirCommand}"
+                FontSize="20"
+                FontWeight="Bold"
+                Padding="20"
+                Width="250"
+                Height="60"
+                HorizontalAlignment="Center"
+                Background="Red"
                 CornerRadius="10"/>
 
     </StackPanel>
