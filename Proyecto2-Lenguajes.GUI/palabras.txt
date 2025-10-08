@@ -1,0 +1,11 @@
+CASA
+PERRO
+GATO
+SOL
+LUNA
+ARBOL
+FLOR
+LIBRO
+AGUA
+CIELO
+otorrinolaringología

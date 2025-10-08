@@ -1,78 +1,197 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:Proyecto2_Lenguajes.GUI.ViewModels"
+<Window
         x:Class="Proyecto2_Lenguajes.GUI.Views.SopaLetrasWindow"
-        x:DataType="vm:SopaLetrasViewModel"
-        Title="Sopa de Letras"
-        Width="800" Height="600">
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Proyecto2_Lenguajes.GUI.ViewModels"
+    x:Name="RootWindow"
+    Title="Sopa de Letras"
+    SizeToContent="WidthAndHeight"
+    MinWidth="800"
+    MaxWidth="1400"
+    Height="700"
+    x:DataType="vm:SopaLetrasViewModel"
+    WindowStartupLocation="CenterScreen">
 
     <Design.DataContext>
-        <vm:SopaLetrasViewModel/>
+        <vm:SopaLetrasViewModel />
     </Design.DataContext>
 
-    <StackPanel Margin="10">
-        <!-- Mensaje de estado -->
-        <TextBlock Text="{Binding MensajeEstado}"
-                   Foreground="{Binding ColorMensaje}"
-                   FontSize="16"
-                   FontWeight="Bold"
-                   Margin="0,0,0,10"
-                   TextAlignment="Center"/>
+    <Grid Margin="20" RowDefinitions="Auto,*,Auto">
 
-        <!-- Matriz de letras -->
-        <ItemsControl ItemsSource="{Binding Matriz}">  <!-- CAMBIO: Items -> ItemsSource -->
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <ItemsControl ItemsSource="{Binding}">  <!-- CAMBIO: Items -> ItemsSource -->
+        <!--  Título  -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock
+                HorizontalAlignment="Center"
+                FontSize="24"
+                FontWeight="Bold"
+                Text="🔤 SOPA DE LETRAS" />
+            <TextBlock
+                Margin="0,10,0,0"
+                HorizontalAlignment="Center"
+                FontSize="14"
+                Text="{Binding EstadoJuego}" />
+        </StackPanel>
+
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto">
+            <!--  Matriz de la Sopa  -->
+            <Border
+                Grid.Column="0"
+                Margin="0,0,20,0"
+                Padding="10"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Background="White"
+                BorderBrush="Gray"
+                BorderThickness="2"
+                CornerRadius="5">
+
+                <ScrollViewer
+                    MaxHeight="550"
+                    HorizontalScrollBarVisibility="Auto"
+                    VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding FilasMatriz}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal"/>
+                                <StackPanel Orientation="Vertical" Spacing="2" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Width="30" Height="30"
-                                        Background="{Binding Color}"
-                                        BorderBrush="Gray"
-                                        BorderThickness="1">
-                                    <TextBlock Text="{Binding Letra}"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"
-                                               FontSize="14"
-                                               FontWeight="Bold"/>
-                                </Border>
+                                <!--  Cada fila  -->
+                                <ItemsControl ItemsSource="{Binding}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" Spacing="2" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <!--  Cada celda como Button interactivo  -->
+                                            <Button
+                                                Width="30"
+                                                Height="30"
+                                                Padding="0"
+                                                Background="{Binding ColorTemporal}"
+                                                BorderBrush="DarkBlue"
+                                                BorderThickness="1"
+                                                CornerRadius="3"
+                                                Click="CeldaButton_Click"
+                                                Tag="{Binding}">
+                                                <Button.Styles>
+                                                    <Style Selector="Button:pointerover">
+                                                        <Setter Property="Background" Value="LightYellow" />
+                                                    </Style>
+                                                    <Style Selector="Button:pressed">
+                                                        <Setter Property="Background" Value="LightBlue" />
+                                                    </Style>
+                                                </Button.Styles>
+                                                <TextBlock
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    FontSize="14"
+                                                    FontWeight="Bold"
+                                                    Text="{Binding Letra}"
+                                                    Foreground="Black" />
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+                </ScrollViewer>
+            </Border>
 
-        <!-- Listas de palabras -->
-        <Grid Margin="0,20,0,0" ColumnDefinitions="*,*">
-            <StackPanel Grid.Column="0" Margin="5">
-                <TextBlock Text="Por encontrar:" FontWeight="Bold" Margin="0,0,0,5"/>
-                <ItemsControl ItemsSource="{Binding PalabrasPorEncontrar}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding}" Margin="5"/>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+            <!--  Palabras por encontrar  -->
+            <StackPanel
+                Grid.Column="1"
+                Margin="0,0,20,0"
+                VerticalAlignment="Top">
+                <TextBlock
+                    Margin="0,0,0,10"
+                    HorizontalAlignment="Center"
+                    FontSize="18"
+                    FontWeight="SemiBold"
+                    Text="Palabras en la Sopa" />
+                <Border
+                    Padding="15"
+                    Background="WhiteSmoke"
+                    BorderBrush="Gray"
+                    BorderThickness="1"
+                    CornerRadius="5">
+                    <ItemsControl ItemsSource="{Binding PalabrasEnSopa}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    Margin="0,3"
+                                    HorizontalAlignment="Center"
+                                    FontSize="14"
+                                    FontWeight="Normal"
+                                    Foreground="Black"
+                                    Text="{Binding}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
             </StackPanel>
 
-            <StackPanel Grid.Column="1" Margin="5">
-                <TextBlock Text="Encontradas:" FontWeight="Bold" Margin="0,0,0,5"/>
-                <ItemsControl ItemsSource="{Binding PalabrasEncontradas}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding}"
-                                       Foreground="Green"
-                                       Margin="5"/>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+            <!--  Palabras encontradas  -->
+            <StackPanel
+                Grid.Column="2"
+                VerticalAlignment="Top">
+                <TextBlock
+                    Margin="0,0,0,10"
+                    HorizontalAlignment="Center"
+                    FontSize="18"
+                    FontWeight="SemiBold"
+                    Foreground="Green"
+                    Text="✓ Encontradas" />
+                <Border
+                    Padding="15"
+                    Background="LightGreen"
+                    BorderBrush="Green"
+                    BorderThickness="1"
+                    CornerRadius="5">
+                    <ItemsControl ItemsSource="{Binding PalabrasEncontradas}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    Margin="0,3"
+                                    HorizontalAlignment="Center"
+                                    FontSize="14"
+                                    FontWeight="SemiBold"
+                                    Foreground="DarkGreen"
+                                    Text="{Binding}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
             </StackPanel>
         </Grid>
-    </StackPanel>
+
+        <!--  Botones  -->
+        <StackPanel
+            Grid.Row="2"
+            Margin="0,20,0,0"
+            HorizontalAlignment="Center"
+            Orientation="Horizontal"
+            Spacing="10">
+            <Button
+                Width="180"
+                Height="40"
+                Command="{Binding GenerarNuevaSopaCommand}"
+                Content="🔄 Nueva Sopa" />
+            <Button
+                Width="180"
+                Height="40"
+                Command="{Binding MostrarSolucionesCommand}"
+                Content="💡 Mostrar Soluciones" />
+            <Button
+                Width="100"
+                Height="40"
+                Command="{Binding VolverCommand}"
+                Content="← Volver" />
+        </StackPanel>
+
+    </Grid>
 </Window>
