@@ -28,8 +28,8 @@ namespace Proyecto2_Lenguajes.GUI.ViewModels
 
         private void AbrirAhorcado()
         {
-            // TODO: Implementar ventana de Ahorcado
-            // Por ahora no hacer nada, solo un placeholder
+            var ahorcadoWindow = new AhorcadoWindow();
+            ahorcadoWindow.Show();
         }
 
         private void AbrirSopaLetras()
