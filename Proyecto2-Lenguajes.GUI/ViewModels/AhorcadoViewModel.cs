@@ -1,3 +1,4 @@
+using Avalonia.Controls;
 using System;
 using System.IO;
 using System.Linq;
@@ -18,7 +19,6 @@ public partial class AhorcadoViewModel : ObservableObject
     private string _letrasUsadas = "";
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ErroresCometidos))]
     private int _intentosRestantes;
 
     [ObservableProperty]
@@ -31,8 +31,6 @@ public partial class AhorcadoViewModel : ObservableObject
     private readonly string[] _palabras;
     private const int MAX_INTENTOS = 6; // Cabeza, cuerpo, 2 brazos, 2 piernas
     private readonly Stopwatch _cronometro = new();
-
-    public int ErroresCometidos => MAX_INTENTOS - IntentosRestantes;
 
     public AhorcadoViewModel()
     {
@@ -56,22 +54,38 @@ public partial class AhorcadoViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void IntentarLetra(string? letraIngresada)
+    private void IntentarLetra(object? parameter)
     {
-        if (!JuegoActivo || string.IsNullOrEmpty(letraIngresada) || !char.IsLetter(letraIngresada[0]))
+        if (parameter is not TextBox inputBox || !JuegoActivo)
         {
             return;
         }
 
+        var letraIngresada = inputBox.Text;
+        if (string.IsNullOrEmpty(letraIngresada) || !char.IsLetter(letraIngresada[0]))
+        {
+            inputBox.Text = ""; // Limpiar input inválido
+            inputBox.Focus();
+            return;
+        }
+
         char letra = letraIngresada.ToUpper()[0];
-        
+
         // No hacer nada si la letra ya fue usada
-        if (_estadoActual.LetrasAdivinadas.Contains(letra)) return;
+        if (_estadoActual.LetrasAdivinadas.Contains(letra))
+        {
+            inputBox.Text = ""; // Limpiar
+            inputBox.Focus();
+            return;
+        }
 
         _estadoActual = Ahorcado.intentarLetra(letra, _estadoActual);
-        
+
         ActualizarPropiedadesUI();
         VerificarEstadoJuego();
+        
+        inputBox.Text = ""; // Limpiar después de usar
+        inputBox.Focus();   // Devolver el foco
     }
 
     private void ActualizarPropiedadesUI()
